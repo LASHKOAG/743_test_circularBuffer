@@ -1,15 +1,20 @@
 /*test 1*/
-#include <mbed.h>
+#include "mbed.h"
+#include <stdio.h>
 
 #define BUFFER_SIZE 5
+char DataB[BUFFER_SIZE];
+
+
+//#define BUFFER_SIZE 2
 
 typedef struct
 {
   int readIndex;
   int writeIndex;
-  int isEmpty;
-  int isFull;
-  int data[BUFFER_SIZE];
+  bool isEmpty;
+  bool isFull;
+  //char data[BUFFER_SIZE];
 }sCircularBuffer;
 
 void init(sCircularBuffer *apArray)
@@ -20,47 +25,43 @@ void init(sCircularBuffer *apArray)
   apArray->isFull     = 0;
 }
 //------------------------------------------------------------------------------
-int put(sCircularBuffer *apArray, int aValue)
+int put(sCircularBuffer *apArray, char* ptrDataB, int aValue)
 {
-  if(apArray->isFull)
-    return -1;
-
-  if(apArray->writeIndex >= BUFFER_SIZE)
-    apArray->writeIndex = 0;
-
-  if(apArray->isEmpty)
+  if(apArray->isFull){return -1;} /*если буффер полон*/
+  
+  if(apArray->writeIndex >= BUFFER_SIZE){apArray->writeIndex = 0;} /*переместиться в самое начало*/
+    
+  if(apArray->isEmpty) /*если буффер пуст*/
   {
     apArray->isEmpty = 0;
-    apArray->data[apArray->writeIndex++] = aValue;
+    // apArray->data[apArray->writeIndex++] = aValue;
+    ptrDataB[apArray->writeIndex++] = aValue;
 
-    if (apArray->writeIndex == apArray->readIndex)
+    if (apArray->writeIndex == apArray->readIndex)/*один индекс догнал другой, буффер полон*/
       apArray->isFull  = 1;
     return 1;
   }
 
-  apArray->data[apArray->writeIndex++] = aValue;
+  ptrDataB[apArray->writeIndex++] = aValue; /*если буффер не пуст*/
 
-  if (apArray->writeIndex == apArray->readIndex)
-    apArray->isFull  = 1;
+  if (apArray->writeIndex == apArray->readIndex){apArray->isFull  = 1;}
+    
 
   return 1;
 }
 //------------------------------------------------------------------------------
-int get(sCircularBuffer *apArray)
+int get(sCircularBuffer *apArray, char* ptrDataB)
 {
-  if(apArray->isEmpty)
-    return -1;
+  if(apArray->isEmpty){return -1;}  /*если буффер пуст*/
+  
+  apArray->isFull = 0;  /*если буффер не пуст*/
 
-  apArray->isFull = 0;
+  if(apArray->readIndex >= BUFFER_SIZE){apArray->readIndex = 0;} 
+ 
+  int res = ptrDataB[apArray->readIndex++];
 
-  if(apArray->readIndex >= BUFFER_SIZE)
-    apArray->readIndex = 0;
-
-  int res = apArray->data[apArray->readIndex++];
-
-  if(apArray->readIndex == apArray->writeIndex)
-    apArray->isEmpty = 1;
-
+  if(apArray->readIndex == apArray->writeIndex){apArray->isEmpty = 1;}
+  
   return  res;
 }
 //------------------------------------------------------------------------------
@@ -85,13 +86,79 @@ int isFull(sCircularBuffer *apArray)
 //------------------------------------------------------------------------------
 int main()
 {
+  printf("\nstep 11\n");
   sCircularBuffer buff;
   int r;
+  int res_put;
 
-  init(&buff);
+  init(&buff); 
 
-  put(&buff, 1);
-  r = get(&buff);
+  res_put=put(&buff, DataB, 1);
+  r = get(&buff, DataB); printf("r = %d\n", r);
+  for(int i=0; i<BUFFER_SIZE; ++i){printf("DataB[%d] = %d\n", i, DataB[i]);fflush(stdout);}
+  printf("res_put = %d\n", res_put);
+  printf("=================================================\n\n"); 
+  
+  res_put=put(&buff, DataB, 2);
+  r = get(&buff, DataB); printf("r = %d\n", r);
+  for(int i=0; i<BUFFER_SIZE; ++i){printf("DataB[%d] = %d\n", i, DataB[i]);fflush(stdout);}
+  printf("res_put = %d\n", res_put);
+  printf("=================================================\n\n"); 
+  
+  res_put=put(&buff, DataB, 3);
+  r = get(&buff, DataB); printf("r = %d\n", r);
+  for(int i=0; i<BUFFER_SIZE; ++i){printf("DataB[%d] = %d\n", i, DataB[i]);fflush(stdout);}
+  printf("res_put = %d\n", res_put);
+  printf("=================================================\n\n"); 
+  
+  res_put=put(&buff, DataB, 4);
+  r = get(&buff, DataB); printf("r = %d\n", r);
+  for(int i=0; i<BUFFER_SIZE; ++i){printf("DataB[%d] = %d\n", i, DataB[i]);fflush(stdout);}
+  printf("res_put = %d\n", res_put);
+  printf("=================================================\n\n");
+  
+  res_put=put(&buff, DataB, 5);
+  r = get(&buff, DataB); printf("r = %d\n", r);
+  for(int i=0; i<BUFFER_SIZE; ++i){printf("DataB[%d] = %d\n", i, DataB[i]);fflush(stdout);}
+  printf("res_put = %d\n", res_put);
+  printf("=================================================\n\n");
+  
+  res_put=put(&buff, DataB, 6);
+  r = get(&buff, DataB); printf("r = %d\n", r);
+  for(int i=0; i<BUFFER_SIZE; ++i){printf("DataB[%d] = %d\n", i, DataB[i]);fflush(stdout);}
+  printf("res_put = %d\n", res_put);
+  printf("=================================================\n\n");
+    res_put=put(&buff, DataB, 7);
+  r = get(&buff, DataB); printf("r = %d\n", r);
+  for(int i=0; i<BUFFER_SIZE; ++i){printf("DataB[%d] = %d\n", i, DataB[i]);fflush(stdout);}
+  printf("res_put = %d\n", res_put);
+  printf("=================================================\n\n"); 
+  
+  res_put=put(&buff, DataB, 8);
+  r = get(&buff, DataB); printf("r = %d\n", r);
+  for(int i=0; i<BUFFER_SIZE; ++i){printf("DataB[%d] = %d\n", i, DataB[i]);fflush(stdout);}
+  printf("res_put = %d\n", res_put);
+  printf("=================================================\n\n");
+  
+  res_put=put(&buff, DataB, 9);
+  r = get(&buff, DataB); printf("r = %d\n", r);
+  for(int i=0; i<BUFFER_SIZE; ++i){printf("DataB[%d] = %d\n", i, DataB[i]);fflush(stdout);}
+  printf("res_put = %d\n", res_put);
+  printf("=================================================\n\n");
+  
+  res_put=put(&buff, DataB, 10);
+  r = get(&buff, DataB); printf("r = %d\n", r);
+  for(int i=0; i<BUFFER_SIZE; ++i){printf("DataB[%d] = %d\n", i, DataB[i]);fflush(stdout);}
+  printf("res_put = %d\n", res_put);
+  printf("=================================================\n\n");
+
+  res_put=put(&buff, DataB, 11);
+  r = get(&buff, DataB); printf("r = %d\n", r);
+  for(int i=0; i<BUFFER_SIZE; ++i){printf("DataB[%d] = %d\n", i, DataB[i]);fflush(stdout);}
+  printf("res_put = %d\n", res_put);
+  printf("=================================================\n\n");
+/*
+
 
   put(&buff, 2);
   r = get(&buff);
@@ -134,5 +201,6 @@ int main()
   r = get(&buff);
   r = get(&buff);
   r = get(&buff);
+  */
   return 0;
 }
